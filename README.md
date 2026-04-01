@@ -1,4 +1,4 @@
-# Lancement de l’environnement TP2 (RabbitMQ + PostgreSQL + Java)
+# Lancement de l’environnement (RabbitMQ + PostgreSQL + Java)
 
 # TP1
 ## Lancer RabbitMQ + Exécuter Producer / Consumer
