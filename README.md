@@ -1,9 +1,10 @@
-# Lancement de l’environnement (RabbitMQ + PostgreSQL + Java)
+# Environment Setup (RabbitMQ + PostgreSQL + Java)
 
 # TP1
-## Lancer RabbitMQ + Exécuter Producer / Consumer
 
-### 1. Lancer RabbitMQ avec Docker
+## Run RabbitMQ + Execute Producer / Consumer
+
+### 1. Run RabbitMQ with Docker
 
 ```bash
 docker run -d \
@@ -14,13 +15,13 @@ docker run -d \
   rabbitmq:3-management
 ```
 
-Accès interface web :
+Web interface access:
 
 ```
 http://localhost:15672
 ```
 
-Login :
+Login:
 
 ```
 guest / guest
@@ -28,7 +29,7 @@ guest / guest
 
 ---
 
-### 2. Structure du projet
+### 2. Project Structure
 
 ```
 project/
@@ -43,13 +44,13 @@ project/
 
 ### 3. Compilation
 
-Windows (PowerShell / CMD) :
+Windows (PowerShell / CMD):
 
 ```bash
 javac -cp ".;lib/*" *.java
 ```
 
-Linux / Mac :
+Linux / Mac:
 
 ```bash
 javac -cp ".:lib/*" *.java
@@ -57,21 +58,21 @@ javac -cp ".:lib/*" *.java
 
 ---
 
-### 4. Exécution (TP1)
+### 4. Execution (TP1)
 
-Terminal 1 :
+Terminal 1:
 
 ```bash
 java -cp ".;lib/*" Receive
 ```
 
-Terminal 2 :
+Terminal 2:
 
 ```bash
 java -cp ".;lib/*" Send
 ```
 
-Résultat attendu :
+Expected result:
 
 ```
 Received: Hello World!
@@ -79,21 +80,21 @@ Received: Hello World!
 
 ---
 
-### 5. Exécution (part2 — Routing)
+### 5. Execution (Part 2 — Routing)
 
-Terminal 1 :
+Terminal 1:
 
 ```bash
 java -cp ".;lib/*" ReceiveLogsDirect
 ```
 
-Terminal 2 :
+Terminal 2:
 
 ```bash
 java -cp ".;lib/*" EmitLogDirect error "Disk failure"
 ```
 
-Résultat attendu :
+Expected result:
 
 ```
 Received [error] Disk failure
@@ -101,50 +102,64 @@ Received [error] Disk failure
 
 ---
 
-### 6. Remarques
+### 6. Notes
 
-* RabbitMQ doit être actif (Docker lancé)
-* Port utilisé :
+* RabbitMQ must be running (Docker container active)
+* Ports used:
 
-  * 5672 → communication Java
-  * 15672 → interface web
-* Sans consumer actif (TP2), les messages sont perdus
-* Les queues du TP2 sont temporaires (non visibles après arrêt)
+  * 5672 → Java communication
+  * 15672 → Web interface
+* Without an active consumer (TP2), messages are lost
+* TP2 queues are temporary (not visible after shutdown)
+
+---
 
 # TP2
-## 1. Lancer RabbitMQ (Docker)
 
-```Powershell
+## 1. Run RabbitMQ (Docker)
+
+```bash
 docker run -d \
   --hostname rabbit-host \
   --name rabbitmq \
   -p 5672:5672 \
   -p 15672:15672 \
   rabbitmq:3-management
-  ```
+```
 
-  
-## 2. Lancer PostgreSQL (Docker)
-```Powershell
+---
+
+## 2. Run PostgreSQL (Docker)
+
+```bash
 docker run -d \
   --name postgres-tp2 \
   -e POSTGRES_PASSWORD=postgres \
   -p 5432:5432 \
   postgres:15
+```
 
-  ```
-## 3. Créer les bases de données
-```Powershell
+---
+
+## 3. Create Databases
+
+```bash
 docker exec -it postgres-tp2 psql -U postgres
 ```
-```SQL
+
+```sql
 CREATE DATABASE sales_bo1;
 CREATE DATABASE sales_bo2;
 CREATE DATABASE sales_ho;
 ```
-## 4. Créer les tables
-BO1 / BO2
-```SQL
+
+---
+
+## 4. Create Tables
+
+### BO1 / BO2
+
+```sql
 CREATE TABLE product_sales (
     sale_id INT PRIMARY KEY,
     product_name VARCHAR(100),
@@ -154,8 +169,10 @@ CREATE TABLE product_sales (
     synced BOOLEAN DEFAULT FALSE
 );
 ```
-HO
-```SQL
+
+### HO
+
+```sql
 CREATE TABLE consolidated_sales (
     id SERIAL PRIMARY KEY,
     branch_id VARCHAR(20),
@@ -167,38 +184,65 @@ CREATE TABLE consolidated_sales (
     UNIQUE (branch_id, sale_id)
 );
 ```
-## 5. Ajouter des données de test
-```SQL
+
+---
+
+## 5. Insert Test Data
+
+```sql
 INSERT INTO product_sales VALUES
 (1, 'Laptop', 2, 3500.00, NOW(), false),
 (2, 'Mouse', 5, 40.00, NOW(), false);
 ```
-## 6. Compiler le projet Java
-```Powershell
+
+---
+
+## 6. Compile the Java Project
+
+```bash
 javac -cp "lib/*" -d bin src/*.java
 ```
-## 7. Lancer le Consumer (Head Office)
-```Powershell
+
+---
+
+## 7. Run the Consumer (Head Office)
+
+```bash
 java -cp "bin;lib/*" HeadOfficeConsumer
 ```
-## 8. Lancer les Producers (Branch Offices)
-BO1
-```Powershell
+
+---
+
+## 8. Run the Producers (Branch Offices)
+
+### BO1
+
+```bash
 java -cp "bin;lib/*" BranchProducer BO1 sales_bo1 bo1.sales
 ```
-BO2
-```Powershell
+
+### BO2
+
+```bash
 java -cp "bin;lib/*" BranchProducer BO2 sales_bo2 bo2.sales
 ```
-## 9. Vérification
-RabbitMQ
-Queue : ho.sales.queue
-Messages : Ready = 0
-PostgreSQL (HO)
-```SQL
+
+---
+
+## 9. Verification
+
+### RabbitMQ
+
+* Queue: `ho.sales.queue`
+* Messages: `Ready = 0`
+
+### PostgreSQL (HO)
+
+```sql
 SELECT * FROM consolidated_sales;
 ```
-Résultat attendu :
 
-données de BO1 et BO2 présentes
-aucune duplication
+Expected result:
+
+* Data from BO1 and BO2 is present
+* No duplication
