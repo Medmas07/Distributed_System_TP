@@ -1,0 +1,6 @@
+{
+  "java.project.referencedLibraries": [
+    "TP1/lib/**/*.jar",
+    "TP2/lib/**/*.jar"
+  ]
+}
