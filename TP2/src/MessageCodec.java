@@ -3,25 +3,33 @@ import java.time.LocalDateTime;
 
 public class MessageCodec {
 
+    public static String encodeSaleRecord(SaleRecord saleRecord) {
+        return saleRecord.branchId + ";" +
+               saleRecord.saleId + ";" +
+               saleRecord.productName + ";" +
+               saleRecord.quantity + ";" +
+               saleRecord.unitPrice + ";" +
+               saleRecord.saleDate;
+    }
+
+    public static SaleRecord decodeSaleRecord(String payload) {
+        String[] parts = payload.split(";");
+
+        return new SaleRecord(
+                parts[0],
+                Integer.parseInt(parts[1]),
+                parts[2],
+                Integer.parseInt(parts[3]),
+                new BigDecimal(parts[4]),
+                LocalDateTime.parse(parts[5])
+        );
+    }
+
     public static String encode(SaleRecord s) {
-        return s.branchId + ";" +
-               s.saleId + ";" +
-               s.productName + ";" +
-               s.quantity + ";" +
-               s.unitPrice + ";" +
-               s.saleDate;
+        return encodeSaleRecord(s);
     }
 
     public static SaleRecord decode(String msg) {
-        String[] p = msg.split(";");
-
-        return new SaleRecord(
-                p[0],
-                Integer.parseInt(p[1]),
-                p[2],
-                Integer.parseInt(p[3]),
-                new BigDecimal(p[4]),
-                LocalDateTime.parse(p[5])
-        );
+        return decodeSaleRecord(msg);
     }
 }

@@ -26,9 +26,9 @@ public class HeadOfficeConsumer {
             String msg = new String(delivery.getBody(), StandardCharsets.UTF_8);
 
             try {
-                SaleRecord s = MessageCodec.decode(msg);
+                SaleRecord s = MessageCodec.decodeSaleRecord(msg);
 
-                insert(s);
+                insertSaleRecord(s);
 
                 channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
 
@@ -42,13 +42,18 @@ public class HeadOfficeConsumer {
         }, tag -> {});
     }
 
-    private static void insert(SaleRecord s) throws Exception {
+    private static void insertSaleRecord(SaleRecord s) throws Exception {
 
-        Connection conn = DbUtil.getConnection("sales_ho");
+        Connection conn = DbUtil.openConnection("sales_ho");
 
         String sql = "INSERT INTO consolidated_sales " +
                 "(branch_id, sale_id, product_name, quantity, unit_price, sale_date) " +
-                "VALUES (?, ?, ?, ?, ?, ?)";
+                "VALUES (?, ?, ?, ?, ?, ?) " +
+                "ON CONFLICT (branch_id, sale_id) DO UPDATE SET " +
+                "product_name = EXCLUDED.product_name, " +
+                "quantity = EXCLUDED.quantity, " +
+                "unit_price = EXCLUDED.unit_price, " +
+                "sale_date = EXCLUDED.sale_date";
 
         PreparedStatement ps = conn.prepareStatement(sql);
 
@@ -63,5 +68,9 @@ public class HeadOfficeConsumer {
 
         ps.close();
         conn.close();
+    }
+
+    private static void insert(SaleRecord s) throws Exception {
+        insertSaleRecord(s);
     }
 }

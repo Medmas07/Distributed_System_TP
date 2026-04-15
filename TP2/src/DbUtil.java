@@ -11,11 +11,15 @@ public class DbUtil {
         }
     }
 
-    public static Connection getConnection(String dbName) throws Exception {
+    public static Connection openConnection(String databaseName) throws Exception {
         return DriverManager.getConnection(
-                AppConfig.jdbcUrl(dbName),
+                AppConfig.jdbcUrl(databaseName),
                 AppConfig.DB_USER,
                 AppConfig.DB_PASS
         );
+    }
+
+    public static Connection getConnection(String dbName) throws Exception {
+        return openConnection(dbName);
     }
 }
