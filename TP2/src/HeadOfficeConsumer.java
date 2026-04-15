@@ -17,7 +17,10 @@ public class HeadOfficeConsumer {
 
         channel.exchangeDeclare(AppConfig.EXCHANGE_NAME, "direct", true);
         channel.queueDeclare(AppConfig.HO_QUEUE, true, false, false, null);
-
+        // true : queue durable
+        // false : non exclusive
+        // false : ne pas supprimer automatiquement
+        // null : pas d’options supplémentaires
         channel.queueBind(AppConfig.HO_QUEUE, AppConfig.EXCHANGE_NAME, AppConfig.RK_BO1);
         channel.queueBind(AppConfig.HO_QUEUE, AppConfig.EXCHANGE_NAME, AppConfig.RK_BO2);
 

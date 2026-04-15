@@ -42,29 +42,20 @@ public class BranchProducer {
         Channel channel = mqConnection.createChannel();
 
         channel.exchangeDeclare(AppConfig.EXCHANGE_NAME, AppConfig.EXCHANGE_TYPE, true);
-        channel.queueDeclare(AppConfig.HO_QUEUE, true, false, false, null);
-        // true : queue durable
-        // false : non exclusive
-        // false : ne pas supprimer automatiquement
-        // null : pas d’options supplémentaires
-        channel.queueBind(AppConfig.HO_QUEUE, AppConfig.EXCHANGE_NAME, AppConfig.RK_BO1);
-        channel.queueBind(AppConfig.HO_QUEUE, AppConfig.EXCHANGE_NAME, AppConfig.RK_BO2);
+       // channel.queueDeclare(AppConfig.HO_QUEUE, true, false, false, null);
+        //channel.queueBind(AppConfig.HO_QUEUE, AppConfig.EXCHANGE_NAME, AppConfig.RK_BO1);
+        //channel.queueBind(AppConfig.HO_QUEUE, AppConfig.EXCHANGE_NAME, AppConfig.RK_BO2);
 
         String select = "SELECT sale_id, product_name, quantity, unit_price, sale_date, xmin::text AS row_version " +
                         "FROM product_sales ORDER BY sale_id";
 
         //         Rôle de xmin
-
         // xmin est une colonne système interne à PostgreSQL.
         // Elle change quand la ligne est modifiée.
-
         // Le programme s’en sert comme version technique.
-
         // Exemple :
-
         // une ligne a xmin = 701
         // après un UPDATE, elle peut passer à xmin = 702
-
         // Donc si xmin change, le programme considère que la ligne a changé.
         try (java.sql.Connection dbConnection = DbUtil.openConnection(dbName);
              PreparedStatement psSelect = dbConnection.prepareStatement(select)) {

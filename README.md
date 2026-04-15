@@ -221,10 +221,22 @@ java -cp "bin;lib/*" HeadOfficeConsumer
 java -cp "bin;lib/*" BranchProducer BO1 sales_bo1 bo1.sales
 ```
 
+Option avec fenetre de disponibilite HO (exemple 09:00 -> 11:00):
+
+```bash
+java -cp "bin;lib/*" BranchProducer BO1 sales_bo1 bo1.sales 9 11
+```
+
 ### BO2
 
 ```bash
 java -cp "bin;lib/*" BranchProducer BO2 sales_bo2 bo2.sales
+```
+
+Option avec fenetre de disponibilite HO (exemple 09:30 -> 11:30):
+
+```bash
+java -cp "bin;lib/*" BranchProducer BO2 sales_bo2 bo2.sales 09:30 11:30
 ```
 
 ---
@@ -246,3 +258,68 @@ Expected result:
 
 * Data from BO1 and BO2 is present
 * No duplication
+
+
+
+
+**sales_bo1**
+1.
+```sql
+INSERT INTO product_sales (sale_id, product_name, quantity, unit_price, sale_date, synced)
+VALUES (101, 'Clavier BO1', 3, 120.00, NOW(), false);
+```
+2.
+```sql
+UPDATE product_sales
+SET quantity = 7, unit_price = 115.00, sale_date = NOW()
+WHERE sale_id = 101;
+```
+3.
+```sql
+INSERT INTO product_sales (sale_id, product_name, quantity, unit_price, sale_date, synced)
+VALUES (102, 'Ecran BO1', 2, 890.00, NOW(), false);
+```
+
+**sales_bo2**
+1.
+```sql
+INSERT INTO product_sales (sale_id, product_name, quantity, unit_price, sale_date, synced)
+VALUES (201, 'Souris BO2', 10, 35.00, NOW(), false);
+```
+2.
+```sql
+UPDATE product_sales
+SET product_name = 'Souris BO2 Pro', quantity = 12, sale_date = NOW()
+WHERE sale_id = 201;
+```
+3.
+```sql
+INSERT INTO product_sales (sale_id, product_name, quantity, unit_price, sale_date, synced)
+VALUES (202, 'Casque BO2', 4, 260.00, NOW(), false);
+```
+
+**sales_ho**
+1.
+```sql
+SELECT id, branch_id, sale_id, product_name, quantity, unit_price, sale_date
+FROM consolidated_sales
+ORDER BY id DESC
+LIMIT 20;
+```
+2.
+```sql
+SELECT branch_id, sale_id, product_name, quantity, unit_price, sale_date
+FROM consolidated_sales
+WHERE branch_id = 'BO1'
+ORDER BY sale_id;
+```
+3.
+```sql
+SELECT branch_id, sale_id, product_name, quantity, unit_price, sale_date
+FROM consolidated_sales
+WHERE branch_id = 'BO2'
+ORDER BY sale_id;
+```
+
+
+java -cp "bin;lib/*" BranchProducer BO2 sales_bo2 bo2.sales 09:30 11:30
